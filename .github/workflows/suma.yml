@@ -1,27 +1,19 @@
-name: Ejecutar Suma Personalizada
+name: Desplegar Django en GitHub Pages
 
 on:
   push:
     branches:
       - main
-      - master
-      - develop
-  workflow_dispatch:
-    inputs:
-      numeros:
-        description: 'Ingresa los números a sumar separados por espacio (ej: 20 30)'
-        required: true
-        default: '10 15'
 
 permissions:
   contents: write
 
 jobs:
-  ejecutar-suma:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Descargar el código
+      - name: Descargar el repositorio
         uses: actions/checkout@v4
 
       - name: Configurar Python
@@ -29,17 +21,17 @@ jobs:
         with:
           python-version: '3.10'
 
-      - name: Ejecutar script con números personalizados
+      - name: Instalar dependencias
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            python sumar.py ${{ github.event.inputs.numeros }}
-          else
-            # Números por defecto cuando se activa por un push
-            python sumar.py 10 20
-          fi
+          python -m pip install --upgrade pip
+          pip install django
+
+      - name: Compilar y exportar Django
+        run: |
+          cd proyecto_suma
+          python manage.py collectstatic --noinput
 
       - name: Hacer Commit y Push del resultado
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "auto: actualizar resultado de la suma"
-          file_pattern: "resultado.txt"
+          commit_message: "auto: actualización del despliegue Django"
