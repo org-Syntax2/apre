@@ -1,19 +1,32 @@
+import sys
 import os
 
 archivo_resultado = "resultado.txt"
 
-# Leer resultado anterior si existe, si no iniciar en 0
+# 1. Leer el total acumulado anterior (si existe)
+acumulado = 0
 if os.path.exists(archivo_resultado):
     with open(archivo_resultado, "r") as f:
         contenido = f.read().strip()
-        valor_actual = int(contenido) if contenido.isdigit() else 0
+        if contenido.lstrip('-').isdigit():
+            acumulado = int(contenido)
+
+# 2. Obtener los números ingresados por parámetro (ej: python sumar.py 15 25 10)
+if len(sys.argv) > 1:
+    numeros = [int(arg) for arg in sys.argv[1:] if arg.lstrip('-').isdigit()]
 else:
-    valor_actual = 0
+    # Si ejecutas el script sin parámetros, sumará 5 por defecto
+    numeros = [5]
 
-nuevo_resultado = valor_actual + 10
+suma_ingresada = sum(numeros)
+nuevo_total = acumulado + suma_ingresada
 
-# Guardar el nuevo valor
+# 3. Guardar el resultado en el archivo
 with open(archivo_resultado, "w") as f:
-    f.write(str(nuevo_resultado))
+    f.write(str(nuevo_total))
 
-print(f"Suma completada: {valor_actual} + 10 = {nuevo_resultado}")
+print("====================================")
+print(f"Total acumulado anterior : {acumulado}")
+print(f"Números a sumar         : {numeros} (Suma = {suma_ingresada})")
+print(f"Nuevo Total acumulado    : {nuevo_total}")
+print("====================================")
