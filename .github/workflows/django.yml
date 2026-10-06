@@ -1,17 +1,20 @@
-name: Django Continuous Integration
+name: Django Continuous Integration & Deploy
 
 on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - main
+
+# Esto le da los permisos al robot para escribir en GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
-  pruebas-django:
+  # 1. Bolita de Verificación y Compilación (Build)
+  build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
@@ -21,11 +24,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Instalar Django y dependencias
+      - name: Instalar Django
         run: |
           python -m pip install --upgrade pip
           pip install django
-          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         working-directory: proyecto_suma
 
       - name: Ejecutar pruebas de Django
@@ -33,8 +35,24 @@ jobs:
           python manage.py test
         working-directory: proyecto_suma
 
-      - name: Publicar enlace y resumen en Actions
-        run: |
-          echo "### 🚀 Verificación de Django Exitosa" >> $GITHUB_STEP_SUMMARY
-          echo "El pipeline de Integración Continua validó la aplicación Django correctamente." >> $GITHUB_STEP_SUMMARY
-          echo "🔗 **Enlace a la interfaz publicada en GitHub Pages:** [Ver Aplicación](https://org-syntax2.github.io/apre/)" >> $GITHUB_STEP_SUMMARY
+      - name: Subir artefacto para GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Le decimos al robot que suba toda la carpeta de la app
+          path: '.'
+
+  # 2. Bolita de Despliegue con el enlace (Deploy)
+  deploy:
+    # Este paso necesita que el 'build' termine exitosamente
+    needs: build
+    runs-on: ubuntu-latest
+    
+    # Este environment genera el link clickeable en la bolita verde
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    steps:
+      - name: Desplegar en GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
