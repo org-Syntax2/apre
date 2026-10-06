@@ -32,3 +32,9 @@ jobs:
         run: |
           python manage.py test
         working-directory: proyecto_suma
+
+      - name: Publicar enlace y resumen en Actions
+        run: |
+          echo "### 🚀 Verificación de Django Exitosa" >> $GITHUB_STEP_SUMMARY
+          echo "El pipeline de Integración Continua validó la aplicación Django correctamente." >> $GITHUB_STEP_SUMMARY
+          echo "🔗 **Enlace a la interfaz publicada en GitHub Pages:** [Ver Aplicación](https://org-syntax2.github.io/apre/)" >> $GITHUB_STEP_SUMMARY
