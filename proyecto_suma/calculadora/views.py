@@ -1,32 +1,38 @@
 import os
 from django.shortcuts import render, redirect
+from django.conf import settings
 
-FILE_PATH = 'resultado.txt'
-
-def obtener_acumulado():
-    if os.path.exists(FILE_PATH):
-        with open(FILE_PATH, 'r') as f:
-            try:
-                return int(f.read().strip())
-            except ValueError:
-                return 0
-    return 0
+# Ruta absoluta al archivo resultado.txt
+TXT_FILE_PATH = os.path.join(settings.BASE_DIR, 'resultado.txt')
 
 def index(request):
     if request.method == 'POST':
-        num1 = int(request.POST.get('num1') or 0)
-        num2 = int(request.POST.get('num2') or 0)
-        
-        total_anterior = obtener_acumulado()
-        nuevo_total = total_anterior + num1 + num2
-        
-        with open(FILE_PATH, 'w') as f:
-            f.write(str(nuevo_total))
-            
+        num1_raw = request.POST.get('num1', '0')
+        num2_raw = request.POST.get('num2', '0')
+
+        try:
+            num1 = int(num1_raw)
+            num2 = int(num2_raw)
+            suma = num1 + num2
+        except ValueError:
+            suma = 0
+
+        # Guardar la suma real en el archivo txt
+        with open(TXT_FILE_PATH, 'w', encoding='utf-8') as f:
+            f.write(str(suma))
+
         return redirect('resultado')
-        
+
     return render(request, 'index.html')
 
+
 def resultado(request):
-    total = obtener_acumulado()
+    total = "0"
+    # Leer el archivo actualizado
+    if os.path.exists(TXT_FILE_PATH):
+        with open(TXT_FILE_PATH, 'r', encoding='utf-8') as f:
+            contenido = f.read().strip()
+            if contenido:
+                total = contenido
+
     return render(request, 'resultado.html', {'total': total})
