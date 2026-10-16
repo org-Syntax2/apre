@@ -185,3 +185,6 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Resultados generados automáticamente
+resultado.txt
+resultado.html

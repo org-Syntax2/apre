@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  ejecutar-django-suma:
+  ejecutar-django:
     runs-on: ubuntu-latest
 
     steps:
@@ -27,13 +27,12 @@ jobs:
           pip install django
         working-directory: proyecto_suma
 
-      - name: Probar ejecucion de suma en Django
+      - name: Ejecutar pruebas de Django
         run: |
-          # Ejecuta una instrucción en Python para simular/generar la suma en resultado.txt
-          python -c "num1 = 25; num2 = 35; suma = num1 + num2; open('resultado.txt', 'w', encoding='utf-8').write(str(suma))"
+          python manage.py test
         working-directory: proyecto_suma
 
-      - name: Subir resultado como artefacto de Django
+      - name: Subir artefacto de Django
         uses: actions/upload-artifact@v4
         with:
           name: resultado-django
