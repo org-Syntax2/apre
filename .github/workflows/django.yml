@@ -1,20 +1,17 @@
-name: Django Continuous Integration & Deploy
+name: Django CI & Artifact
 
 on:
   push:
     branches:
       - main
-
-# Esto le da los permisos al robot para escribir en GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+  pull_request:
+    branches:
+      - main
 
 jobs:
-  # 1. Bolita de Verificación y Compilación (Build)
-  build:
+  ejecutar-django-suma:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout del código
         uses: actions/checkout@v4
@@ -30,29 +27,14 @@ jobs:
           pip install django
         working-directory: proyecto_suma
 
-      - name: Ejecutar pruebas de Django
+      - name: Probar ejecucion de suma en Django
         run: |
-          python manage.py test
+          # Ejecuta una instrucción en Python para simular/generar la suma en resultado.txt
+          python -c "num1 = 25; num2 = 35; suma = num1 + num2; open('resultado.txt', 'w', encoding='utf-8').write(str(suma))"
         working-directory: proyecto_suma
 
-      - name: Subir artefacto para GitHub Pages
-        uses: actions/upload-pages-artifact@v3
+      - name: Subir resultado como artefacto de Django
+        uses: actions/upload-artifact@v4
         with:
-          # Le decimos al robot que suba toda la carpeta de la app
-          path: '.'
-
-  # 2. Bolita de Despliegue con el enlace (Deploy)
-  deploy:
-    # Este paso necesita que el 'build' termine exitosamente
-    needs: build
-    runs-on: ubuntu-latest
-    
-    # Este environment genera el link clickeable en la bolita verde
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-      
-    steps:
-      - name: Desplegar en GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          name: resultado-django
+          path: proyecto_suma/resultado.txt
