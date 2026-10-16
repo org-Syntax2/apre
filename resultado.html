@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Resultado Acumulado</title>
+  <title>Resultado de la Suma</title>
   <style>
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -22,51 +22,53 @@
       width: 360px;
       text-align: center;
     }
-    h2 { color: #2c3e50; }
+    h2 { color: #2c3e50; margin-bottom: 10px; }
     .result-box {
-      background-color: #e6ffec;
-      border: 2px solid #2da44e;
-      color: #1a7f37;
-      font-size: 36px;
+      font-size: 42px;
       font-weight: bold;
-      padding: 20px;
+      color: #2da44e;
+      background: #f0fdf4;
+      padding: 15px;
       border-radius: 8px;
       margin: 20px 0;
+      border: 1px solid #bbf7d0;
     }
     .btn {
-      background-color: #6e7781;
+      background-color: #0969da;
       color: white;
       border: none;
-      padding: 10px 15px;
+      padding: 12px 20px;
       border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
       text-decoration: none;
       display: inline-block;
-      font-size: 14px;
+      box-sizing: border-box;
     }
-    .btn:hover { background-color: #57606a; }
+    .btn:hover { background-color: #0860ca; }
   </style>
 </head>
 <body>
 
   <div class="card">
     <h2>Resultado Acumulado</h2>
-    <p>Valor total guardado en <code>resultado.txt</code>:</p>
+    <p style="color: #555;" id="texto-operacion">Calculando...</p>
     
-    <div id="resultado" class="result-box">Cargando...</div>
+    <div class="result-box" id="caja-resultado">0</div>
 
-    <a href="index.html" class="btn">⬅ Volver a Ingreso</a>
+    <a href="index.html" class="btn">Volver a Ingreso</a>
   </div>
 
   <script>
-    // Carga el contenido de resultado.txt dinámicamente
-    fetch('resultado.txt?t=' + new Date().getTime())
-      .then(response => response.text())
-      .then(data => {
-        document.getElementById('resultado').innerText = data.trim();
-      })
-      .catch(error => {
-        document.getElementById('resultado').innerText = 'Error al cargar';
-      });
+    // Recuperamos los números ingresados
+    let n1 = parseFloat(localStorage.getItem('n1')) || 0;
+    let n2 = parseFloat(localStorage.getItem('n2')) || 0;
+    let suma = n1 + n2;
+
+    // Mostramos el detalle en pantalla
+    document.getElementById('texto-operacion').innerHTML = `La suma de <strong>${n1}</strong> + <strong>${n2}</strong> es:`;
+    document.getElementById('caja-resultado').innerText = suma;
   </script>
 
 </body>
