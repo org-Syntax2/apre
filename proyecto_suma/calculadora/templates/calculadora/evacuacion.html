@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Evacuación y Monitoreo Sísmico</title>
+
+    <!-- Estilos de Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Estilos de Leaflet Routing Machine (Rutas por carretera y km) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.css" />
+
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="{% static 'recursos/estilos/estilo.css' %}" />
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+        }
+        h1, h2, h3 {
+            color: #333;
+            text-align: center;
+        }
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+        }
+        #map {
+            width: 100%;
+            height: 550px;
+            border-radius: 8px;
+            z-index: 1;
+        }
+        
+        /* Contenedor y diseño del Modelo 3D Interactivo */
+        .modelo-container {
+            width: 100%;
+            height: 350px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+            overflow: hidden;
+            cursor: grab;
+        }
+        .cube {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            transform-style: preserve-3d;
+            animation: rotateCube 10s infinite linear;
+        }
+        .cube-face {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: rgba(52, 152, 219, 0.85);
+            border: 2px solid #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+        }
+        .front  { transform: translateZ(75px); background: rgba(41, 128, 185, 0.9); }
+        .back   { transform: rotateY(180deg) translateZ(75px); background: rgba(31, 97, 141, 0.9); }
+        .right  { transform: rotateY(90deg) translateZ(75px); background: rgba(52, 152, 219, 0.9); }
+        .left   { transform: rotateY(-90deg) translateZ(75px); background: rgba(93, 173, 226, 0.9); }
+        .top    { transform: rotateX(90deg) translateZ(75px); background: rgba(46, 204, 113, 0.9); }
+        .bottom { transform: rotateX(-90deg) translateZ(75px); background: rgba(231, 76, 60, 0.9); }
+
+        @keyframes rotateCube {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(360deg) rotateY(360deg); }
+        }
+
+        .instrucciones {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            color: #0d47a1;
+            font-weight: bold;
+        }
+
+        /* Estilos para la multimedia */
+        .media-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        .media-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            text-align: center;
+        }
+        .media-item img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+        }
+        audio, video {
+            width: 100%;
+            margin-top: 10px;
+        }
+        .btn-pdf {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #d32f2f;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        .btn-pdf:hover {
+            background-color: #b71c1c;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Centro de Evacuación y Alerta Sísmica</h1>
+
+        <!-- Sección de Alerta Visual -->
+        <div class="card" style="border-left: 6px solid #d32f2f; background-color: #ffebee;">
+            <h2 style="color: #c62828;">⚠️ Alerta de Emergencia y Evacuación</h2>
+            <p>Siga atentamente las instrucciones del personal brigadista y mantenga la calma durante el protocolo de seguridad.</p>
+        </div>
+
+        <!-- Sección de Modelo 3D Interactivo -->
+        <div class="card">
+            <h2>Modelo 3D Interactivo (Estructura de Evacuación)</h2>
+            <p>Estructura tridimensional interactiva generada para simulación de zonas seguras:</p>
+            <div class="modelo-container" id="view3D">
+                <div class="cube">
+                    <div class="cube-face front">Zona Segura A</div>
+                    <div class="cube-face back">Punto Encuentro</div>
+                    <div class="cube-face right">Salida 1</div>
+                    <div class="cube-face left">Salida 2</div>
+                    <div class="cube-face top">Alerta</div>
+                    <div class="cube-face bottom">Sótano</div>
+                </div>
+            </div>
+            <p style="text-align: center; font-size: 13px; color: #666; margin-top: 10px;">💡 Tip: Mantén presionado y arrastra el cursor sobre el cuadro negro para interactuar.</p>
+        </div>
+
+        <!-- Sección de Audios -->
+        <div class="card">
+            <h2>🔊 Audios de Protocolo y Alertas</h2>
+            <div class="media-grid">
+                <div class="media-item">
+                    <h3>Alerta Sísmica</h3>
+                    <audio controls preload="auto">
+                        <source src="{% static 'recursos/audios/alertas/alerta.mp3 (2).mp3' %}" type="audio/mpeg">
+                        Tu navegador no soporta el reproductor de audio.
+                    </audio>
+                </div>
+                <div class="media-item">
+                    <h3>Instrucciones de Ayuda</h3>
+                    <audio controls preload="auto">
+                        <source src="{% static 'recursos/audios/alertas/ayuda.mp3 (2).mp3' %}" type="audio/mpeg">
+                        Tu navegador no soporta el reproductor de audio.
+                    </audio>
+                </div>
+                <div class="media-item">
+                    <h3>Calma y Relajación (Yoga)</h3>
+                    <audio controls preload="auto">
+                        <source src="{% static 'recursos/audios/alertas/yoga.mp3 (2).mp3' %}" type="audio/mpeg">
+                        Tu navegador no soporta el reproductor de audio.
+                    </audio>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Galería de Imágenes e Icono -->
+        <div class="card">
+            <h2>🖼️ Imágenes, Icono y Documentación</h2>
+            <div class="media-grid">
+                <div class="media-item">
+                    <h3>Icono de Salida</h3>
+                    <img src="{% static 'recursos/imagenes/iconos/salida.svg.jpg' %}" alt="Icono de Salida" style="max-height: 100px;">
+                </div>
+                <div class="media-item">
+                    <h3>Plano del Lugar</h3>
+                    <img src="{% static 'recursos/imagenes/fotos/Plano.png.jpg' %}" alt="Plano de Evacuación">
+                </div>
+                <div class="media-item">
+                    <h3>Plan de Evacuación (PDF)</h3>
+                    <p>Descarga o visualiza el protocolo en formato PDF:</p>
+                    <a href="{% static 'recursos/documentos/pdf/peligroyriesgoscompletado.pdf' %}" target="_blank" class="btn-pdf">📄 Abrir Plan de Evacuación</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de Video Simulacro -->
+        <div class="card">
+            <h2>🎥 Video de Simulacro de Evacuación</h2>
+            <div class="media-item">
+                <video controls style="max-height: 400px;">
+                    <source src="{% static 'recursos/videos/clips/simulacro.mp4' %}" type="video/mp4">
+                    <track src="{% static 'recursos/videos/subtitulos/subtitulos.vtt' %}" kind="subtitles" srclang="es" label="Español" default>
+                    Tu navegador no soporta el reproductor de video.
+                </video>
+            </div>
+        </div>
+
+        <!-- Sección del Mapa con Rutas y Sismos -->
+        <div class="card">
+            <h2>Mapa de Evacuación, Sismos y Rutas por Carretera</h2>
+            <div class="instrucciones">
+                📌 <b>Instrucciones de Ruta:</b> Haz clic en el mapa para marcar el <b>Punto A (Origen)</b> y luego haz clic en otro lugar para marcar el <b>Punto B (Destino)</b>. El sistema calculará automáticamente la ruta por carretera y los kilómetros de distancia. (Un tercer clic reinicia los puntos).
+            </div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Scripts de Leaflet y Routing Machine -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
+    
+    <!-- Tus scripts locales -->
+    <script src="{% static 'recursos/scripts/mapa.js' %}"></script>
+    <script src="{% static 'recursos/scripts/sismos_api.js' %}"></script>
+
+    <script>
+        // Control interactivo para mover el cubo con el mouse
+        const container = document.getElementById('view3D');
+        const cube = document.querySelector('.cube');
+        let isDragging = false;
+        let startX, startY;
+        let rotX = 0, rotY = 0;
+
+        container.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            startX = e.clientX;
+            startY = e.clientY;
+            cube.style.animation = 'none';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            let deltaX = e.clientX - startX;
+            let deltaY = e.clientY - startY;
+            rotY += deltaX * 0.5;
+            rotX -= deltaY * 0.5;
+            cube.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+            startX = e.clientX;
+            startY = e.clientY;
+        });
+
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+    </script>
+</body>
+</html>

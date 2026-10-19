@@ -36,3 +36,5 @@ def resultado(request):
                 total = contenido
 
     return render(request, 'resultado.html', {'total': total})
+def evacuacion_view(request):
+    return render(request, 'calculadora/evacuacion.html')
