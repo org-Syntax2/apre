@@ -124,3 +124,5 @@ STATIC_URL = 'static/'
 # MODIFICACIÓN 3: Configuración de rutas y almacenamiento para Render
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media' 

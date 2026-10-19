@@ -1,10 +1,10 @@
 // 1. Inicializar el mapa centrado de referencia
 var map = L.map('map').setView([4.570868, -74.297333], 6);
 
-// 2. Cargar capa base de OpenStreetMap
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+// 2. Cargar capa base de Esri World Street Map (100% libre de bloqueos para local y Render)
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
     maxZoom: 19,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, and the GIS User Community'
 }).addTo(map);
 
 // 3. Obtener ubicación actual del usuario por GPS

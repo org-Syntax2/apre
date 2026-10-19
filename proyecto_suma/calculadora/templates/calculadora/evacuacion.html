@@ -193,6 +193,39 @@
             </div>
         </div>
 
+        <!-- Nueva Sección: Subir y Guardar Archivos -->
+        <div class="card">
+            <h2>📤 Subir Archivos al Sistema</h2>
+            <p>Selecciona un archivo o documento para almacenarlo en la base de datos y la página:</p>
+            
+            <form method="POST" enctype="multipart/form-data" style="margin-top: 15px;">
+                {% csrf_token %}
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <label style="font-weight: bold;">Título o Nombre del Archivo:</label><br>
+                    <input type="text" name="titulo" required style="width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;">
+                </div>
+                <div style="margin-bottom: 12px; text-align: left;">
+                    <label style="font-weight: bold;">Seleccionar Archivo:</label><br>
+                    <input type="file" name="archivo" required style="margin-top: 5px;">
+                </div>
+                <button type="submit" class="btn-pdf" style="background-color: #2e7d32; cursor: pointer; border: none;">Guardar Archivo en la Página</button>
+            </form>
+
+            <hr style="margin: 25px 0; border: 0; border-top: 1px solid #eee;">
+
+            <h3 style="text-align: left;">📁 Archivos Guardados Recientemente:</h3>
+            <ul style="text-align: left; margin-top: 10px; list-style-type: none; padding-left: 0;">
+                {% for item in archivos %}
+                    <li style="background: #f8f9fa; padding: 10px; margin-bottom: 8px; border-radius: 5px; border: 1px solid #e0e0e0;">
+                        <b>{{ item.titulo }}</b> <span style="font-size: 12px; color: #666;">({{ item.fecha_subida|date:"d/m/Y H:i" }})</span> — 
+                        <a href="{{ item.archivo.url }}" target="_blank" style="color: #1976d2; font-weight: bold; text-decoration: none;">📄 Ver / Descargar</a>
+                    </li>
+                {% empty %}
+                    <p style="color: #666; font-style: italic;">Aún no se han subido archivos.</p>
+                {% endfor %}
+            </ul>
+        </div>
+
         <!-- Sección de Galería de Imágenes e Icono -->
         <div class="card">
             <h2>🖼️ Imágenes, Icono y Documentación</h2>
@@ -203,7 +236,7 @@
                 </div>
                 <div class="media-item">
                     <h3>Plano del Lugar</h3>
-                    <img src="{% static 'recursos/imagenes/fotos/Plano.png.jpg' %}" alt="Plano de Evacuación">
+                    <img src="{% static 'recursos/imagenes/fotos/Plano.png' %}" alt="Plano de Evacuación">
                 </div>
                 <div class="media-item">
                     <h3>Plan de Evacuación (PDF)</h3>
@@ -240,7 +273,7 @@
     <script src="https://unpkg.com/leaflet-routing-machine@latest/dist/leaflet-routing-machine.js"></script>
     
     <!-- Tus scripts locales -->
-    <script src="{% static 'recursos/scripts/mapa.js' %}"></script>
+    <script src="{% static 'recursos/scripts/mapa.js' %}?v=2"></script>
     <script src="{% static 'recursos/scripts/sismos_api.js' %}"></script>
 
     <script>
